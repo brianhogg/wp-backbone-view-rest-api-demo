@@ -49,13 +49,18 @@
         },
 
         save: function() {
+            var me = this;
             this.model.save({
                 'title': this.$('.title').val(),
-                'status': this.$('.post_status').val()
+                'status': this.$('.status').val()
             },
             {
-                headers: { 'X-WP-Nonce': bbdata.nonce }
-            });
+                headers: { 'X-WP-Nonce': bbdata.nonce },
+                success: function() {
+                    me.$el.effect("highlight", {}, 1500);
+                }
+            }
+            );
         },
 
         prepare: function() {

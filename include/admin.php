@@ -2,7 +2,7 @@
     <td><input type="text" class="title" value="{{{ data.post_title }}}" /></td>
     <# console.log(data) #>
     <td>
-        <select class="post_status">
+        <select class="status">
             <option value="publish"<# if ( data.post_status == 'publish' ) { #> SELECTED<# } #>><?php echo esc_html( __( 'Published', 'backbone-example' ) ) ?></option>
                     <option value="draft"<# if ( data.post_status == 'draft' ) { #> SELECTED<# } #>><?php echo esc_html( __( 'Draft', 'backbone-example' ) ) ?></option>
         </select>

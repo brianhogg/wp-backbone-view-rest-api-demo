@@ -20,7 +20,7 @@ class BackbonePostListing {
     function init() {
         wp_register_script( 'backbone-example',
             plugins_url( 'js/backbone-example.js', __FILE__ ),
-            array( 'wp-backbone' ),
+            array( 'wp-backbone', 'jquery-effects-highlight' ),
             VERSION
         );
     }
