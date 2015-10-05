@@ -39,22 +39,33 @@ class BackbonePostListing {
           * This hook invokes the function only on our plugin administration screen,
           * see: http://codex.wordpress.org/Administration_Menus#Page_Hook_Suffix
           */
-        add_action( 'admin_print_scripts-' . $page_hook_suffix, array( $this, 'load_javascript' ) );
+        add_action( 'admin_print_scripts-' . $page_hook_suffix, array( $this, 'load_scripts' ) );
     }
 
     function get_json_api_url() {
         return '/wp-json/wp/v2';
     }
 
-    function load_javascript() {
-        wp_localize_script( 'backbone-example', 'bbdata', array(
-            'posts' => get_posts( array(
-                'posts_per_page' => 10
-            ) ),
-            'api_url' => $this->get_json_api_url(),
-            'nonce' => wp_create_nonce( 'wp_rest' ),
-        ) );
+    function load_scripts() {
+        wp_localize_script(
+            'backbone-example',
+            'bbdata',
+            array(
+                'posts' => get_posts( array(
+                    'posts_per_page' => 10,
+                    'post_status' => 'draft,publish',
+                ) ),
+                'api_url' => $this->get_json_api_url(),
+                'nonce' => wp_create_nonce( 'wp_rest' ),
+            )
+        );
         wp_enqueue_script( 'backbone-example' );
+        wp_enqueue_style(
+            'backbone-demo',
+            plugins_url( 'css/style.css', __FILE__ ),
+            '',
+            VERSION
+        );
     }
 
     function admin_page() {
