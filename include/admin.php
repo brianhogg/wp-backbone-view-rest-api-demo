@@ -1,10 +1,10 @@
-<script type="text/template" id="tmpl-bb-post-template">
-    <td><input type="text" class="title" value="{{{ data.post_title }}}" /></td>
+<script type="text/template" id="tmpl-bb-post">
+    <td><input type="text" class="title" value="{{{ data.title }}}" /></td>
     <# console.log(data) #>
     <td>
         <select class="status">
-            <option value="publish"<# if ( data.post_status == 'publish' ) { #> SELECTED<# } #>><?php echo esc_html( __( 'Published', 'backbone-example' ) ) ?></option>
-                    <option value="draft"<# if ( data.post_status == 'draft' ) { #> SELECTED<# } #>><?php echo esc_html( __( 'Draft', 'backbone-example' ) ) ?></option>
+            <option value="publish"<# if ( data.status == 'publish' ) { #> SELECTED<# } #>><?php echo esc_html( __( 'Published', 'backbone-example' ) ) ?></option>
+                    <option value="draft"<# if ( data.status == 'draft' ) { #> SELECTED<# } #>><?php echo esc_html( __( 'Draft', 'backbone-example' ) ) ?></option>
         </select>
     </td>
     <td>

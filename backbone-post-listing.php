@@ -9,7 +9,6 @@ License: GPL2
 */
 
 class BackbonePostListing {
-
     const VERSION = '1.0';
 
     function __construct() {
@@ -47,14 +46,27 @@ class BackbonePostListing {
     }
 
     function load_scripts() {
+        // WP REST API feeds data in a certain format, build our seed data array to match
+        $posts = get_posts( array(
+            'posts_per_page' => 1000,
+            'post_status' => 'draft,publish',
+        ) );
+
+        // TODO: Verify format of "status", how to fetch with headers? (does not come through even with X-WP-Nonce)
+        $post_data = array();
+        foreach ( $posts as $post ) {
+            $post_data[] = array(
+                'id' => $post->ID,
+                'title' => $post->post_title,
+                'status' => $post->post_status,
+            );
+        }
+
         wp_localize_script(
             'backbone-example',
             'bbdata',
             array(
-                'posts' => get_posts( array(
-                    'posts_per_page' => 10,
-                    'post_status' => 'draft,publish',
-                ) ),
+                'posts' => $post_data,
                 'api_url' => $this->get_json_api_url(),
                 'nonce' => wp_create_nonce( 'wp_rest' ),
             )

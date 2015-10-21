@@ -1,22 +1,17 @@
+var bbdemo = bbdemo || {};
+var wp = window.wp || {};
+
 (function($) {
-    var bbdemo = bbdemo || {};
-    var wp = window.wp || {};
-
     bbdemo.PostModel = Backbone.Model.extend({
-        sync: function(method, model, options) {
-            // Set to the URL to update the post
-            options.url = bbdata.api_url + '/posts/' + this.get('ID');
-
-            /**
-             * Pass back to the default handler.
-             */
-            return Backbone.sync( method, model, options );
-        }
     });
 
     bbdemo.PostCollection = Backbone.Collection.extend({
         model: bbdemo.PostModel,
-        url: bbdata.api_url + '/posts'
+        url: bbdata.api_url + '/posts',
+
+        parse: function() {
+            // TODO: Change title.rendered to just title
+        }
     });
 
     bbdemo.PostsView = wp.Backbone.View.extend({
@@ -33,10 +28,18 @@
         addPostView: function(post) {
             this.views.add('.bb-posts', new bbdemo.PostView({ model: post }));
         }
+
+        /*,
+
+        refreshPosts: function() {
+            // TODO: How to call fetch on the collection and pass headers, plus url?
+            // TODO: And how to pass in the status in the result?
+            this.collection.fetch({ url: bbdata.api_url + '/posts?filter[post_status]=draft,publish' })
+        }*/
     });
 
     bbdemo.PostView = wp.Backbone.View.extend({
-        template: wp.template('bb-post-template'),
+        template: wp.template('bb-post'),
         tagName: 'tr',
 
         initialize: function() {
@@ -50,10 +53,9 @@
 
         save: function() {
             var me = this;
-            this.model.save({
-                'title': this.$('.title').val(),
-                'status': this.$('.status').val()
-            },
+            this.model.set('title', this.$('.title').val());
+            this.model.set('status', this.$('.status').val());
+            this.model.save({},
             {
                 headers: { 'X-WP-Nonce': bbdata.nonce },
                 success: function() {
@@ -70,10 +72,10 @@
 
     bbdemo.initialize = function() {
         // Initialize the collection with our seeded data
-        var postCollection = new bbdemo.PostCollection(bbdata.posts);
+        bbdemo.postCollection = new bbdemo.PostCollection(bbdata.posts);
 
         // Start our container view with the collection
-        var postsView = new bbdemo.PostsView({ collection: postCollection });
+        var postsView = new bbdemo.PostsView({ collection: bbdemo.postCollection });
 
         $('#bbdemo-listing').html(postsView.render().el);
     }
