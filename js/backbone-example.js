@@ -3,15 +3,18 @@ var wp = window.wp || {};
 
 (function($) {
     bbdemo.PostModel = Backbone.Model.extend({
+        initialize: function(data) {
+            try {
+                this.set('title', data.title.rendered);
+            } catch (e) {
+                console.log(e);
+            }
+        }
     });
 
     bbdemo.PostCollection = Backbone.Collection.extend({
         model: bbdemo.PostModel,
-        url: bbdata.api_url + '/posts',
-
-        parse: function() {
-            // TODO: Change title.rendered to just title
-        }
+        url: bbdata.api_url + '/posts'
     });
 
     bbdemo.PostsView = wp.Backbone.View.extend({
@@ -21,21 +24,35 @@ var wp = window.wp || {};
             this.addViewsFromCollection();
         },
 
+        events: {
+            'click #refresh': 'refreshPosts'
+        },
+
         addViewsFromCollection: function() {
             _.each(this.collection.models, this.addPostView, this);
         },
 
         addPostView: function(post) {
             this.views.add('.bb-posts', new bbdemo.PostView({ model: post }));
-        }
-
-        /*,
+        },
 
         refreshPosts: function() {
-            // TODO: How to call fetch on the collection and pass headers, plus url?
+            var me = this;
             // TODO: And how to pass in the status in the result?
-            this.collection.fetch({ url: bbdata.api_url + '/posts?filter[post_status]=draft,publish' })
-        }*/
+
+            // TODO: Have the collection re-render vs. re-adding? Listen to collection "add" event?
+            //_.each(this.collection.models, function(model) { model.remove(); }, this);
+            this.collection.reset();
+            this.views.remove();
+            this.render();
+            this.collection.fetch({
+                url: bbdata.api_url + '/posts?filter[post_status]=draft,publish&context=edit',
+                headers: { 'X-WP-Nonce': bbdata.nonce },
+                success: function() {
+                   me.addViewsFromCollection();
+                }
+            });
+        }
     });
 
     bbdemo.PostView = wp.Backbone.View.extend({
@@ -43,7 +60,7 @@ var wp = window.wp || {};
         tagName: 'tr',
 
         initialize: function() {
-            // Destroy this view when the model is removed from the collection, ie a refresh
+            // Destroy this view when the model is removed from the collection
             this.listenTo(this.model, 'remove', this.remove);
         },
 

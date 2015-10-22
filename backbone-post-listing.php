@@ -50,6 +50,7 @@ class BackbonePostListing {
         $posts = get_posts( array(
             'posts_per_page' => 1000,
             'post_status' => 'draft,publish',
+            'suppress_filters' => false, // run content/title through any filters
         ) );
 
         // TODO: Verify format of "status", how to fetch with headers? (does not come through even with X-WP-Nonce)
@@ -57,7 +58,9 @@ class BackbonePostListing {
         foreach ( $posts as $post ) {
             $post_data[] = array(
                 'id' => $post->ID,
-                'title' => $post->post_title,
+                'title' => array(
+                    'rendered' => $post->post_title,
+                ),
                 'status' => $post->post_status,
             );
         }
