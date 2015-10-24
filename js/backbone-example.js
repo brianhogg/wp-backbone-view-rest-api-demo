@@ -2,7 +2,7 @@ var bbdemo = bbdemo || {};
 var wp = window.wp || {};
 
 (function($) {
-    bbdemo.PostModel = Backbone.Model.extend({
+    bbdemo.Post = Backbone.Model.extend({
         initialize: function(data) {
             try {
                 this.set('title', data.title.rendered);
@@ -13,12 +13,27 @@ var wp = window.wp || {};
     });
 
     bbdemo.PostCollection = Backbone.Collection.extend({
-        model: bbdemo.PostModel,
+        model: bbdemo.Post,
         url: bbdata.api_url + '/posts'
     });
 
     bbdemo.PostsView = wp.Backbone.View.extend({
         template: wp.template('bb-post-listing'),
+
+        events: {
+            'click .refresh': 'refreshPosts'
+        },
+
+        refreshPosts: function() {
+            this.collection.reset();
+            this.views.remove();
+            this.render();
+            this.collection.fetch({
+                // Override the url for the fetch to be able to get draft posts and the publish "status" value in the result
+                url: bbdata.api_url + '/posts?filter[post_status]=draft,publish&context=edit',
+                headers: { 'X-WP-Nonce': bbdata.nonce }
+            });
+        },
 
         initialize: function() {
             this.listenTo(this.collection, 'add', this.addPostView);
@@ -41,12 +56,9 @@ var wp = window.wp || {};
             var self = this;
             this.model.set('title', this.$('.title').val());
             this.model.set('status', this.$('.status').val());
-
-            // WP REST API needs the nonce header to authenticate a save
             this.model.save({}, {
                 headers: { 'X-WP-Nonce': bbdata.nonce },
                 success: function() {
-                    // Highlight the row when the save completes
                     self.$el.effect('highlight', {}, 3000);
                 }
             });
@@ -58,15 +70,9 @@ var wp = window.wp || {};
     });
 
     bbdemo.initialize = function() {
-        bbdemo.postCollection = new bbdemo.PostCollection();
-
-        // Create the wrapper view with the collection
-        var postsView = new bbdemo.PostsView({ collection: bbdemo.postCollection });
-
-        // Add in the seeded posts data
-        bbdemo.postCollection.add(bbdata.posts);
-
-        // Inject the view into the DOM
+        var postCollection = new bbdemo.PostCollection();
+        var postsView = new bbdemo.PostsView({ collection: postCollection });
+        postCollection.add(bbdata.posts);
         $('#bbdemo-listing').html(postsView.render().el);
     }
 
