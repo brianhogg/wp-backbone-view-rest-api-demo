@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Backbone Post Listing
-Description: A plugin that fetches posts and allows the title and publish status to be changed
+Description: A plugin that fetches posts and allows the title and publish status to be changed, using the WP REST API v2
 Version: 1.0
 Author: Brian Hogg
 Author URI: http://brianhogg.com
@@ -51,9 +51,9 @@ class BackbonePostListing {
             'posts_per_page' => 1000,
             'post_status' => 'draft,publish',
             'suppress_filters' => false, // run content/title through any filters
+            'orderby' => 'ID',
         ) );
 
-        // TODO: Verify format of "status", how to fetch with headers? (does not come through even with X-WP-Nonce)
         $post_data = array();
         foreach ( $posts as $post ) {
             $post_data[] = array(

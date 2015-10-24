@@ -21,37 +21,11 @@ var wp = window.wp || {};
         template: wp.template('bb-post-listing'),
 
         initialize: function() {
-            this.addViewsFromCollection();
-        },
-
-        events: {
-            'click #refresh': 'refreshPosts'
-        },
-
-        addViewsFromCollection: function() {
-            _.each(this.collection.models, this.addPostView, this);
+            this.listenTo(this.collection, 'add', this.addPostView);
         },
 
         addPostView: function(post) {
             this.views.add('.bb-posts', new bbdemo.PostView({ model: post }));
-        },
-
-        refreshPosts: function() {
-            var me = this;
-            // TODO: And how to pass in the status in the result?
-
-            // TODO: Have the collection re-render vs. re-adding? Listen to collection "add" event?
-            //_.each(this.collection.models, function(model) { model.remove(); }, this);
-            this.collection.reset();
-            this.views.remove();
-            this.render();
-            this.collection.fetch({
-                url: bbdata.api_url + '/posts?filter[post_status]=draft,publish&context=edit',
-                headers: { 'X-WP-Nonce': bbdata.nonce },
-                success: function() {
-                   me.addViewsFromCollection();
-                }
-            });
         }
     });
 
@@ -59,27 +33,23 @@ var wp = window.wp || {};
         template: wp.template('bb-post'),
         tagName: 'tr',
 
-        initialize: function() {
-            // Destroy this view when the model is removed from the collection
-            this.listenTo(this.model, 'remove', this.remove);
-        },
-
         events: {
             'click .save': 'save'
         },
 
         save: function() {
-            var me = this;
+            var self = this;
             this.model.set('title', this.$('.title').val());
             this.model.set('status', this.$('.status').val());
-            this.model.save({},
-            {
+
+            // WP REST API needs the nonce header to authenticate a save
+            this.model.save({}, {
                 headers: { 'X-WP-Nonce': bbdata.nonce },
                 success: function() {
-                    me.$el.effect("highlight", {}, 1500);
+                    // Highlight the row when the save completes
+                    self.$el.effect('highlight', {}, 3000);
                 }
-            }
-            );
+            });
         },
 
         prepare: function() {
@@ -88,17 +58,19 @@ var wp = window.wp || {};
     });
 
     bbdemo.initialize = function() {
-        // Initialize the collection with our seeded data
-        bbdemo.postCollection = new bbdemo.PostCollection(bbdata.posts);
+        bbdemo.postCollection = new bbdemo.PostCollection();
 
-        // Start our container view with the collection
+        // Create the wrapper view with the collection
         var postsView = new bbdemo.PostsView({ collection: bbdemo.postCollection });
 
+        // Add in the seeded posts data
+        bbdemo.postCollection.add(bbdata.posts);
+
+        // Inject the view into the DOM
         $('#bbdemo-listing').html(postsView.render().el);
     }
 
     $(document).ready(function(){
         bbdemo.initialize();
     });
-
 })(jQuery);

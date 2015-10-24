@@ -21,8 +21,6 @@
         </thead>
         <tbody class="bb-posts"></tbody>
     </table>
-
-    <p><button id="refresh" class="button button-primary"><?php echo esc_html( __( 'Refresh', 'backbone-example' ) ) ?></button></p>
 </script>
 
 <div class="wrap">
