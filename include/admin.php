@@ -4,7 +4,7 @@
     <td>
         <select class="status">
             <option value="publish"<# if ( data.status == 'publish' ) { #> SELECTED<# } #>><?php echo esc_html( __( 'Published', 'backbone-example' ) ) ?></option>
-                    <option value="draft"<# if ( data.status == 'draft' ) { #> SELECTED<# } #>><?php echo esc_html( __( 'Draft', 'backbone-example' ) ) ?></option>
+            <option value="draft"<# if ( data.status == 'draft' ) { #> SELECTED<# } #>><?php echo esc_html( __( 'Draft', 'backbone-example' ) ) ?></option>
         </select>
     </td>
     <td>
